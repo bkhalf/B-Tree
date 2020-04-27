@@ -190,7 +190,7 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 					break;
 				}
 			}
-			if(found!=null && i==ke.size())node=node.children[i+1];
+			if(found==null && i==ke.size())node=node.children[i];
 			if(found!=null||node == null) {
 				break;
 			}
@@ -206,6 +206,34 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	public BNode searching(Comparable key) {
+		if(key==null)return null;
+		BNode node=root;
+		point found=null;
+		while(true) {
+			ArrayList<K> ke=(ArrayList<K>) node.getKeys();
+			int i=0;
+			for(i=0;i<ke.size();i++) {
+				int comp=key.compareTo(ke.get(i));
+				if(comp==0) {
+					found=node.data[i];
+					return node;
+				}else if(comp<0) {
+					node=node.children[i];
+					break;
+				}
+			}
+			if(found==null && i==ke.size())node=node.children[i];
+			if(found!=null||node == null) {
+				break;
+			}
+			
+		}
+		return null;
+		
+	}
+
 	public void print(IBTreeNode<K,V>  n)
 	{
 		List<K> keysn=new ArrayList<K>();
