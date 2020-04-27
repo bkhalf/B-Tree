@@ -1,6 +1,6 @@
 package eg.edu.alexu.csd.filestructure.btree;
 
-import eg.edu.alexu.csd.filestructure.btree.BNode.point;
+import eg.edu.alexu.csd.filestructure.btree.BNode.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,28 +176,30 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 	public Object search(Comparable key) {
 		if(key==null)return null;
 		BNode node=root;
-		point found=null;
+		V found=null;
 		while(true) {
 			ArrayList<K> ke=(ArrayList<K>) node.getKeys();
+			ArrayList<K> va=(ArrayList<K>) node.getValues();
+			ArrayList<K> ch=(ArrayList<K>) node.getChildren();
 			int i=0;
 			for(i=0;i<ke.size();i++) {
 				int comp=key.compareTo(ke.get(i));
 				if(comp==0) {
-					found=node.data[i];
+					found=(V) va.get(i);
 					break;
 				}else if(comp<0) {
-					node=node.children[i];
+					node=(BNode) ch.get(i);
 					break;
 				}
 			}
-			if(found==null && i==ke.size())node=node.children[i];
+			if(found==null && i==ke.size())node=(BNode) ch.get(i);
 			if(found!=null||node == null) {
 				break;
 			}
 			
 		}
 		if(found==null)return null;
-		else return found.value;
+		else return found;
 		
 	}
 
@@ -210,21 +212,23 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 	public BNode searching(Comparable key) {
 		if(key==null)return null;
 		BNode node=root;
-		point found=null;
+		V found=null;
 		while(true) {
 			ArrayList<K> ke=(ArrayList<K>) node.getKeys();
+			ArrayList<K> va=(ArrayList<K>) node.getValues();
+			ArrayList<K> ch=(ArrayList<K>) node.getChildren();
 			int i=0;
 			for(i=0;i<ke.size();i++) {
 				int comp=key.compareTo(ke.get(i));
 				if(comp==0) {
-					found=node.data[i];
+					found=(V) va.get(i);
 					return node;
 				}else if(comp<0) {
-					node=node.children[i];
+					node=(BNode) ch.get(i);
 					break;
 				}
 			}
-			if(found==null && i==ke.size())node=node.children[i];
+			if(found==null && i==ke.size())node=(BNode) ch.get(i);
 			if(found!=null||node == null) {
 				break;
 			}
