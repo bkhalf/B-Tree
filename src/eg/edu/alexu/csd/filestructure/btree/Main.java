@@ -10,7 +10,7 @@ public class Main {
         s.insert(5,10);
         s.insert(6,10);
         s.insert(10,10);
-       System.out.println(s.search(8)); 
+
 
 s.print(s.getRoot());
     }
