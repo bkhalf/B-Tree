@@ -1,43 +1,52 @@
 package eg.edu.alexu.csd.filestructure.btree;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 
-	class Point<K extends Comparable<K>, V>{
-		 K key=null;
-		 V value=null;
+	 class point <K extends Comparable<K>, V>{
+		public K key=null;
+		public V value=null;
 	}
 
 	private boolean leaf;
-	private int numberOfKeys;
-	private int numberOfChildren;
-	private BNode [] children;
-	private BNode parent;
-	private Point<K,V>[] data;
+	private int keysN;
+	private int m;
+	public BNode [] children;
+	public BNode parent;
+	public point<K,V>[] data;
 
+//	public ArrayList <K> keys;
+//	public ArrayList<V> values;
+
+
+
+	//constructor
 	public BNode (int numberOfChildren,BNode Parent) {
-		numberOfKeys =0;
+		keysN=0;
 		leaf=true;
-		this.numberOfChildren=numberOfChildren;
-		children = new BNode [numberOfChildren];
-		Arrays.fill(this.children, null);
-		data = new Point[numberOfChildren-1];
-		Arrays.fill(data,null);
+		m=numberOfChildren;
+		children=new BNode [m];
+//		System.out.println(children[0]);
+//		Arrays.fill(children, null);
+		data=new point[m-1];
+//		Arrays.fill(data,null);
+//		for(int i=0;i<m-1;i++) {
+//			data[i]=new point();
+//		}
+//		keys=new ArrayList<K>();
+//		values=new ArrayList<V>(m-1);
 		this.parent=Parent;
 	}
-
-
 	@Override
 	public int getNumOfKeys() {
-		return numberOfKeys;
+		return keysN;
 	}
 
 	@Override
 	public void setNumOfKeys(int numOfKeys) {
-		this.numberOfKeys =numOfKeys;
+		this.keysN=numOfKeys;
 	}
 
 	@Override
@@ -52,52 +61,56 @@ public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 
 	@Override
 	public List<K> getKeys() {
-		if(numberOfKeys ==0)
+		if(keysN==0)
 			return null;
-		List<K>ans=new ArrayList<>();
-		for(int i = 0; i< numberOfKeys; i++) {
-			ans.add(data[i].key);
+		List<K>ans=new ArrayList<K>();
+		for(int i=0;i<keysN;i++) {
+//			data[i]=new point();
+			ans.add((K) data[i].key);
 		}
 		return ans;
 	}
 
 	@Override
 	public void setKeys(List<K> keys) {
-		if(keys.size()<numberOfChildren) {
+		Arrays.fill(this.data, null);
+		if(keys.size()<m) {
 			for(int i=0;i<keys.size();i++) {
-				data[i]=new Point();
+				data[i]=new point();
 				data[i].key=keys.get(i);
 			}
-			numberOfKeys =keys.size();
+			keysN=keys.size();
 		}
+
 	}
 
 	@Override
 	public List<V> getValues() {
-		if(numberOfKeys ==0)
+		if(keysN==0)
 			return null;
 		List<V>ans=new ArrayList<V>();
-		for(int i = 0; i< numberOfKeys; i++) {
-			ans.add(data[i].value);
+		for(int i=0;i<keysN;i++) {
+			ans.add( (V) data[i].value);
 		}
 		return ans;
 	}
 
 	@Override
 	public void setValues(List<V> values) {
-		if(values.size()<numberOfChildren) {
+		if(values.size()<m) {
 			for(int i=0;i<values.size();i++) {
 				data[i].value=values.get(i);
 			}
 		}
+
 	}
 
 	@Override
 	public List<IBTreeNode<K, V>> getChildren() {
-		if(numberOfKeys ==0)
+		if(keysN==0)
 			return null;
-		List<IBTreeNode<K, V>> ans = new ArrayList<>();
-		for(int i = 0; i< numberOfChildren /*&&children[i] !=null*/; i++) {
+		List<IBTreeNode<K, V>>ans=new ArrayList<IBTreeNode<K, V>>();
+		for(int i=0;i<=keysN;i++) {
 			ans.add(children[i]);
 		}
 		return ans;
@@ -105,18 +118,13 @@ public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 
 	@Override
 	public void setChildren(List<IBTreeNode<K, V>> children) {
-//		are children sorted?!
-		if(children.size()<=numberOfChildren) {
+		Arrays.fill(this.children, null);
+		if(children.size()<=m) {
 			for(int i=0;i<children.size();i++) {
+//				this.children[i]=new BNode(m,this);
 				this.children[i]=(BNode) children.get(i);
 			}
 		}
 	}
-	public BNode getParent() {
-		return parent;
-	}
 
-	public void setParent(BNode parent) {
-		this.parent = parent;
-	}
 }
