@@ -1,52 +1,37 @@
 package eg.edu.alexu.csd.filestructure.btree;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 
-	 class point <K extends Comparable<K>, V>{
-		public K key=null;
-		public V value=null;
-	}
 
 	private boolean leaf;
-	private int keysN;
-	private int m;
-	public BNode [] children;
-	public BNode parent;
-	public point<K,V>[] data;
+	private int numberOfChildren;
+	private IBTreeNode<K, V>[] children;
+	private IBTreeNode<K, V> parent;
+	private List<Point<K,V>> data;
 
-//	public ArrayList <K> keys;
-//	public ArrayList<V> values;
-
-
-
-	//constructor
-	public BNode (int numberOfChildren,BNode Parent) {
-		keysN=0;
+	public BNode (int numberOfChildren,IBTreeNode<K, V> Parent) {
 		leaf=true;
-		m=numberOfChildren;
-		children=new BNode [m];
-//		System.out.println(children[0]);
-//		Arrays.fill(children, null);
-		data=new point[m-1];
-//		Arrays.fill(data,null);
-//		for(int i=0;i<m-1;i++) {
-//			data[i]=new point();
-//		}
-//		keys=new ArrayList<K>();
-//		values=new ArrayList<V>(m-1);
+		this.numberOfChildren = numberOfChildren;
+		children = new BNode[numberOfChildren+1];
+		Arrays.fill(children , null);
+		data = new ArrayList<>();
 		this.parent=Parent;
 	}
+
+// to be revised
 	@Override
 	public int getNumOfKeys() {
-		return keysN;
+		return data.size();
 	}
 
 	@Override
 	public void setNumOfKeys(int numOfKeys) {
-		this.keysN=numOfKeys;
+		data =data.subList(0,numOfKeys);
 	}
 
 	@Override
@@ -61,70 +46,121 @@ public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 
 	@Override
 	public List<K> getKeys() {
-		if(keysN==0)
+		if( data.isEmpty())
 			return null;
-		List<K>ans=new ArrayList<K>();
-		for(int i=0;i<keysN;i++) {
-//			data[i]=new point();
-			ans.add((K) data[i].key);
+		List<K> ans = new ArrayList<>();
+		for (Point<K, V> datum : data) {
+			ans.add(datum.getKey());
 		}
 		return ans;
 	}
 
 	@Override
 	public void setKeys(List<K> keys) {
-		Arrays.fill(this.data, null);
-		if(keys.size()<m) {
+		if(keys.size()<numberOfChildren && keys.size()<=data.size()) {
 			for(int i=0;i<keys.size();i++) {
-				data[i]=new point();
-				data[i].key=keys.get(i);
+				data.get(i).setKey(keys.get(i));
 			}
-			keysN=keys.size();
 		}
-
 	}
 
 	@Override
 	public List<V> getValues() {
-		if(keysN==0)
+		if( data.isEmpty())
 			return null;
-		List<V>ans=new ArrayList<V>();
-		for(int i=0;i<keysN;i++) {
-			ans.add( (V) data[i].value);
+		List<V> ans = new ArrayList<>();
+		for (Point<K, V> datum : data) {
+			ans.add(datum.getValue());
 		}
 		return ans;
 	}
 
 	@Override
 	public void setValues(List<V> values) {
-		if(values.size()<m) {
+		if(values.size()<numberOfChildren && values.size()<=data.size()) {
 			for(int i=0;i<values.size();i++) {
-				data[i].value=values.get(i);
+				data.get(i).setValue(values.get(i));
 			}
 		}
-
 	}
 
 	@Override
 	public List<IBTreeNode<K, V>> getChildren() {
-		if(keysN==0)
-			return null;
-		List<IBTreeNode<K, V>>ans=new ArrayList<IBTreeNode<K, V>>();
-		for(int i=0;i<=keysN;i++) {
-			ans.add(children[i]);
+		List<IBTreeNode<K,V>> list = new ArrayList<>();
+		for(int i = 0 ; i < children.length && children[i]!= null; i++){
+			list.add(children[i]);
 		}
-		return ans;
+		return list;
 	}
 
+	public IBTreeNode<K,V> getChild(int index){
+		return children[index];
+	}
+	public void addChild(IBTreeNode<K,V> node){
+		int i;
+		for(i=0 ; i < children.length; i++){
+			if(children[i]== null)
+				break;
+		}
+		children[i] = node;
+	}
+	public void addChildAfter(IBTreeNode<K,V> prev ,IBTreeNode<K,V> node){
+//		int index=0;
+//		for(int i=0 ; i < children.length&& children[i]!= null; i++){
+//			if(children[i]== prev){
+//				index = i+1;
+//				break;
+//			}
+//		}
+		int i = numberOfChildren-1;
+		while (true){
+			if(children[i]==prev){
+				break;
+			}else {
+				children[i+1]=children[i];
+			}
+			i--;
+		}
+		children[i+1] = node;
+	}
+	public void addChild(int index,IBTreeNode<K,V> node){
+		children.add(index,node);
+	}
+	public void removechild(IBTreeNode<K,V> node){
+		children.remove(node);
+	}
 	@Override
 	public void setChildren(List<IBTreeNode<K, V>> children) {
-		Arrays.fill(this.children, null);
-		if(children.size()<=m) {
-			for(int i=0;i<children.size();i++) {
-//				this.children[i]=new BNode(m,this);
-				this.children[i]=(BNode) children.get(i);
-			}
+		children.sort(Comparator.comparing(o -> o.getKeys().get(0)));
+		for(int i = 0 ; i < children.size() ; i++){
+			this.children[i] = children.get(i);
 		}
 	}
+	public List<Point<K, V>> getData() {
+		return data;
+	}
 
+	public void setData(List<Point<K, V>> data) {
+		this.data = data;
+	}
+
+	public void addPoint(Point<K,V> point){
+		data.add(point);
+		data.sort(Comparator.comparing(Point::getKey));
+	}
+	public void removePoint(Point<K,V> point){
+		data.remove(point);
+		data.sort(Comparator.comparing(Point::getKey));
+	}
+	public Point getpoint(int index){
+		return data.get(index);
+	}
+
+	public IBTreeNode<K, V> getParent() {
+		return parent;
+	}
+
+	public void setParent(IBTreeNode<K, V> parent) {
+		this.parent = parent;
+	}
 }

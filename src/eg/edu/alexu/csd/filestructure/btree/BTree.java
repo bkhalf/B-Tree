@@ -1,21 +1,23 @@
 package eg.edu.alexu.csd.filestructure.btree;
 
-//import eg.edu.alexu.csd.filestructure.btree.BNode.point;
 
+import javax.management.RuntimeErrorException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
-	private BNode root=null;
-	private int Mindegree;
+	private BNode root = null;
+	private int mindegree;
 
 	public BTree( int mindegree) {
-		this.Mindegree = mindegree;
+	    if(mindegree <2)
+	        throw new RuntimeErrorException(new ExceptionInInitializerError());
+		this.mindegree = mindegree;
 	}
 
 	@Override
 	public int getMinimumDegree() {
-		return Mindegree;
+		return mindegree;
 	}
 
 	@Override
@@ -23,218 +25,97 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 		return root;
 	}
 
-	public void nonfullInsert(BNode x, Comparable key,Object value) {
-		int i=x.getNumOfKeys();
-		if(x.isLeaf())
-		{
-			List<K> keys=new ArrayList<K>();
-			keys=x.getKeys();
-			List<K> values=new ArrayList<K>();
-			values=x.getValues();
-			if(keys.size()<Mindegree*2-1){
-			keys.add(null);
-			values.add(null);}
-			while(i >= 1 && key.compareTo(keys.get(i-1))<0 )//here find spot to put key.
-			{
-				keys.set(i,keys.get(i-1));
-				values.set(i,values.get(i-1));
-				i--;
-			}
-
-			keys.set(i, (K) key);
-			values.set(i, (K) value);
-			if(x.getNumOfKeys()==0) {
-				keys.add(i, (K) key);
-				values.add(i, (K) value);
-			}
-			else {
-				keys.set(i, (K) key);
-				values.set(i, (K) value);
-			}
-			x.setKeys(keys);
-			x.setValues(values);
-		}
-		else {
-			int j = 0;
-			List<K> keys = new ArrayList<K>();
-			List<K> values = new ArrayList<K>();
-
-			if(x.getKeys()!=null){
-			keys = x.getKeys();
-			values=x.getValues();
-			}
-			while (j < x.getNumOfKeys() && key.compareTo(keys.get(j)) > 0)//find spot to recurse
-			{                         //on correct child
-				j++;
-			}
-
-			if (x.getChildren() != null) {
-				List<BNode<K, V>> childx = new ArrayList<BNode<K, V>>();
-				childx = x.getChildren();
-				if (childx.get(j).getNumOfKeys() == Mindegree * 2 - 1) {
-					split(x, j, childx.get(j));//call split on node x's ith child
-					List<K> keysx = new ArrayList<K>();
-					keysx = x.getKeys();
-					List<K> valuessx = new ArrayList<K>();
-					valuessx = x.getValues();
-					if (key.compareTo(keysx.get(j)) > 0) {
-						j++;
-					}
-				}
-				childx = x.getChildren();
-				nonfullInsert(childx.get(j), key,value);//recurse
-			}
-		}
-
-	}
-
 	@Override
-	public void insert(Comparable key, Object value) {
-
-		BNode root = (BNode) getRoot();
-		if (root == null) {
-			this.root = new BNode(Mindegree * 2, null);
-			List<K> keys = new ArrayList<K>();
-			List<K> values = new ArrayList<K>();
-
-			keys.add((K) key);
-			values.add((K) value);
-			this.root.setKeys(keys);
-			this.root.setValues(values);
+	public void insert(K key, V value) {
+	    if(key == null || value == null)
+	        throw new RuntimeErrorException(new ExceptionInInitializerError());
+		Point<K,V> point = new Point<>(key,value);
+		if(root == null) {
+			root = new BNode<>(2 * mindegree , null);
+			root.addPoint(point);
 			return;
 		}
-
-		if (root.getNumOfKeys() == Mindegree * 2 - 1) {
-//			boolean ss = true;
-//			if (root.getChildren() != null) {
-//
-//				ss = splitroot(key);
-//			}
-//			if (ss) {
-				BNode s = new BNode(Mindegree * 2, null);
-				this.root = s;
-				s.setLeaf(false);
-				s.setNumOfKeys(0);
-				List<BNode<K, V>> childs = new ArrayList<BNode<K, V>>();
-				childs.add(root);
-				s.setChildren(childs);
-				split(s, 0, root);
-				nonfullInsert(s, key, value); //call insert method
-			} else
-				nonfullInsert(root, key, value);//if its not full just insert it
-
-
+		insert(root ,point);
 	}
-
-
-
-//	public boolean splitroot(Comparable key){
-//
-//		List<IBTreeNode<K, V>>child=root.getChildren();
-//		int k=0;
-//		List<K> keys=root.getKeys();
-//		while (k<root.getNumOfKeys() && key.compareTo(keys.get(k))>0) {
-//			k++;
-//		}
-//		if(child.get(k).getNumOfKeys()==Mindegree*2-1){
-//
-//
-//		}
-//			return false;
-//		}
-
-
-	public void split(BNode x, int i, BNode y)
-	{
-		BNode z = new BNode(Mindegree*2,null);
-		z.setLeaf(y.isLeaf());
-		z.setNumOfKeys(Mindegree-1);
-		List<K> keys=new ArrayList<K>();
-		keys=y.getKeys();
-		List<K> values=new ArrayList<K>();
-		values=y.getValues();
-		List<K> keysz=new ArrayList<K>();
-		List<K> valuesz=new ArrayList<K>();
-
-		for(int j = 0; j < Mindegree - 1; j++)
-		{
-			keysz.add(keys.get(j+Mindegree));
-			valuesz.add(values.get(j+Mindegree));
+	private void insert(BNode<K, V> node ,Point<K,V> point){
+		List<K> keys = node.getKeys();
+		if(node.isLeaf()){
+		    for(K key:keys){
+		        if (point.getKey().compareTo(key)==0)
+		            return;
+            }
+			node.addPoint(point);
+			checkDataSize(node);
+			return;
 		}
-			z.setKeys(keysz);
-			z.setValues(valuesz);
-
-		if(!y.isLeaf())//if not leaf we have to reassign child nodes.
-		{
-			List<IBTreeNode<K, V>>child=new ArrayList<IBTreeNode<K, V>>();
-			child=y.getChildren();
-
-			for(int k = 0; k < Mindegree; k++)
-			{
-//				child.set()
-				child.remove(Mindegree);
-//				z.child[k] = y.child[k+order]; //reassing child of y
+		for (int i = 0 ; i < keys.size() ; i++){
+			if(point.getKey().compareTo(keys.get(i))<0){
+				insert((BNode<K, V>) node.getChild(i),point);
+				return;
+			}else if(point.getKey().compareTo(keys.get(i))>0){
+				/*if it's the last key in the list*/
+				if(i == keys.size()-1){
+					insert((BNode<K, V>) node.getChild(i+1),point);
+					return;
+				}
+			}else {
+				return;
 			}
-			z.setChildren(child);
-
 		}
-
-		List<K> keysx=new ArrayList<K>();
-		List<K> valuesx=new ArrayList<K>();
-
-		if(x.getKeys()!=null) {
-			keysx = x.getKeys();
-			valuesx=x.getValues();
-		}
-		if(keysx.size()<Mindegree*2-1){
-		keysx.add(null);
-		valuesx.add(null);}
-		for(int j = x.getNumOfKeys(); j> i; j--)
-		{
-			keysx.set(j,keysx.get(j-1));
-			valuesx.set(j,valuesx.get(j-1));
-		}
-		List<K> keysy=new ArrayList<K>();
-		List<K> valuesy=new ArrayList<K>();
-
-		keysy=y.getKeys();
-		valuesy=y.getValues();
-		keysx.set(i,keysy.get(Mindegree-1));
-		valuesx.set(i,valuesy.get(Mindegree-1));
-		x.setKeys(keysx);
-		x.setValues(valuesx);
-
-		for(int j = 0; j < Mindegree ; j++)
-		{
-			keysy.remove(Mindegree-1);
-			valuesy.remove(Mindegree-1);
-		}
-		y.setKeys(keysy);
-		y.setValues(valuesy);
-		List<BNode<K, V>>childx=new ArrayList<BNode<K, V>>();
-		childx=x.getChildren();
-		if(childx.size()<Mindegree*2)
-		childx.add(null);
-		for(int j = x.getNumOfKeys()-1 ; j> i ; j--)
-		{
-			childx.set(j+1,childx.get(j));
-//			x.child[j+1] = x.child[j]; //shift children of x
-		}
-		childx.set(i+1,z);
-		x.setChildren(childx);
-
-
 	}
+	private void checkDataSize(BNode<K,V> node){
+		if(node.getData().size()>2 * mindegree - 1){
+			split((BNode<K, V>) node.getParent(), node);
+		}
+	}
+	private void split(BNode<K, V> parent , BNode<K, V> node){
+		if(node == root){
+			parent = new BNode<>(2*mindegree , null);
+			parent.setLeaf(false);
+			parent.addChild(node);
+			node.setParent(parent);
+			root = parent;
+		}
+		List<Point<K,V>> nodeData = node.getData();
+		List<IBTreeNode<K, V>> nodeChildren = node.getChildren();
+		int numOfKeys = 2 * mindegree - 1;
+		BNode<K,V> splitNode = new BNode<>(2*mindegree , parent);
+		List<Point<K,V>> splitNodeData = new ArrayList<>();
+		if(!node.isLeaf()){
+			splitNode.setLeaf(false);
+            splitNode.setChildren(nodeChildren.subList(nodeChildren.size()/2+1,nodeChildren.size()));
+            for(int i = nodeChildren.size()/2+1 ; i < nodeChildren.size() ; i++){
+                ((BNode<K,V>)nodeChildren.get(i)).setParent(splitNode);
+            }
+            node.setChildren(nodeChildren.subList(0,nodeChildren.size()/2+1));
+        }
+		parent.addPoint(nodeData.get(numOfKeys/2+1));
+		for(int i =numOfKeys/2+2 ; i <= numOfKeys ; i++){
+			splitNodeData.add(nodeData.get(i));
+		}
+		splitNode.setData(splitNodeData);
+//		or node.size()
+		node.setData(nodeData.subList(0,numOfKeys/2+1));
+//		siblings.add(splitNode);
+//		parent.setChildren(siblings);
+//		List<IBTreeNode<K, V>> siblings = parent.getChildren();
+//		int index =siblings.indexOf(node)+1;
+		parent.addChildAfter(node,splitNode);
+		checkDataSize(parent);
+	}
+
 
 	@Override
 	public Object search(Comparable key) {
-		if(key==null)return null;
+		if(key==null)
+			throw new RuntimeErrorException(new ExceptionInInitializerError());
 		BNode node=root;
+		if(root==null)return null;
 		V found=null;
 		while(true) {
 			ArrayList<K> ke=(ArrayList<K>) node.getKeys();
-			ArrayList<K> va=(ArrayList<K>) node.getValues();
-			ArrayList<K> ch=(ArrayList<K>) node.getChildren();
+			ArrayList<V> va=(ArrayList<V>) node.getValues();
+			ArrayList<BNode> ch=(ArrayList<BNode>) node.getChildren();
 			int i=0;
 			for(i=0;i<ke.size();i++) {
 				int comp=key.compareTo(ke.get(i));
@@ -242,26 +123,212 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 					found=(V) va.get(i);
 					break;
 				}else if(comp<0) {
-					node=(BNode) ch.get(i);
+					node= ch.get(i);
 					break;
 				}
 			}
-			if(found==null && i==ke.size())node=(BNode) ch.get(i);
+			if(found==null && i==ke.size())node= ch.get(i);
 			if(found!=null||node == null) {
 				break;
 			}
-			
+
 		}
 		if(found==null)return null;
 		else return found;
-		
-	}
 
+	}
 	@Override
 	public boolean delete(Comparable key) {
-		// TODO Auto-generated method stub
-		return false;
+		if(key == null) throw new RuntimeErrorException(null);
+		BNode x = searching(key);
+		if(x==null) throw new RuntimeErrorException(null);
+		if(x==root && x.isLeaf()){
+			if(x.getNumOfKeys() == 1){
+				root=null;
+			}else {
+				List<Point<K,V>> datax=x.getData();
+				Point<K,V> theOne=null;
+				for(int i=0;i<datax.size();i++){
+					int comp = key.compareTo(datax.get(i).getKey());
+					if(comp==0){
+						theOne=(datax.get(i));
+						x.removePoint(theOne);
+						break;
+					}
+				}
+			}
+		}
+		else if (x.isLeaf()){
+			deleteLeaf(x,key);
+		}else if(!x.isLeaf()){
+			deleteInternal(x,key);
+		}
+
+		return true;
 	}
+
+	private void deleteInternal(BNode x,Comparable key) {
+		List<Point<K,V>> datax=x.getData();
+		Point<K,V> theOne=null;
+		int indexOfKey =0;
+		for(int i=0;i<datax.size();i++){
+			int comp = key.compareTo(datax.get(i).getKey());
+			if(comp==0){
+				theOne=(datax.get(i));
+				indexOfKey=i;
+				break;
+			}
+		}
+		BNode succ=null,pre;
+		pre=predesessor((BNode) x.getChild(indexOfKey));
+		if(pre.getNumOfKeys() == mindegree-1) {
+			succ=inordersucssessor((BNode) x.getChild(indexOfKey+1));
+		}
+		if(succ == null){
+			x.removePoint(theOne);
+			x.addPoint(pre.getpoint(pre.getNumOfKeys()-1));
+			pre.removePoint(pre.getpoint(pre.getNumOfKeys()-1));
+		}else {
+			if(succ.getNumOfKeys() >= mindegree){
+				x.removePoint(theOne);
+				x.addPoint(succ.getpoint(0));
+				succ.removePoint(succ.getpoint(0));
+			}
+			else {
+				x.removePoint(theOne);
+				x.addPoint(pre.getpoint(pre.getNumOfKeys()-1));
+				deleteLeaf(pre,pre.getNumOfKeys()-1);
+			}
+
+
+		}
+
+
+	}
+
+	private void deleteLeaf(BNode x,Comparable key) {
+		List<Point<K,V>> datax=x.getData();
+		Point<K,V> theOne=null;
+		for(int i=0;i<datax.size();i++){
+			int comp = key.compareTo(datax.get(i).getKey());
+			if(comp==0){
+				theOne=(datax.get(i));
+			}
+		}
+		if(x.getNumOfKeys() >= this.mindegree){
+			x.removePoint(theOne);
+			return;
+		}else{
+			BNode y = (BNode) x.getParent();
+			BNode left=null,right=null;
+			int indexOfX=0;
+			List<BNode<K, V>> childs = y.getChildren();
+			for(int i=0;i<childs.size();i++){
+				if (childs.get(i) == x) {
+					indexOfX=i;
+					if (i != 0) left = (BNode) y.getChild(i-1);
+					if (i != childs.size() - 1) right = (BNode) y.getChild(i+1);
+				}
+			}
+			if(right!=null && right.getNumOfKeys() >= this.mindegree){
+				x.removePoint(theOne);
+				x.addPoint(y.getpoint(indexOfX));
+				y.removePoint(y.getpoint(indexOfX));
+				y.addPoint(right.getpoint(0));
+				right.removePoint(right.getpoint(0));
+			}else if (left !=null && left.getNumOfKeys() >= this.mindegree){
+				x.removePoint(theOne);
+				x.addPoint(y.getpoint(indexOfX-1));
+				y.removePoint(y.getpoint(indexOfX-1));
+				y.addPoint(left.getpoint(left.getData().size()-1));
+				left.removePoint(left.getpoint(left.getData().size()-1));
+			}else{
+				x.removePoint(theOne);
+				if(right!=null){
+					merging(x,y,right,indexOfX);
+				}else if(left!=null){
+					merging(x,y,left,indexOfX-1);
+				}
+			}
+
+		}
+	}
+	public void merging(BNode x,BNode y,BNode place,int index){
+
+		x.addPoint(y.getpoint(index));
+		int k=0;
+		for ( k = 0; k < place.getKeys().size(); k++) {
+			x.addPoint(place.getpoint(k));
+			if(!x.isLeaf()){
+				BNode ch= (BNode) place.getChild(k);
+				ch.setParent(x);
+				x.addChild(ch);
+
+			}
+		}
+		if(!x.isLeaf()){
+			BNode ch= (BNode) place.getChild(k);
+			ch.setParent(x);
+			x.addChild(ch);
+
+		}
+		y.removePoint(y.getpoint(index));
+		y.removechild(place);
+		if(y.getNumOfKeys() < mindegree-1 ){
+			//ReArrange
+			ReArrange(x,y);
+		}
+	}
+
+	private void ReArrange(BNode z,BNode x) {   //z==>BNode x;      x==>BNode y ||x.getParent();
+		if(x==root){
+			if(x.getNumOfKeys()==0){
+				root=z;
+				return;
+			}else {
+				return ;
+			}
+		}
+		BNode y = (BNode) x.getParent();
+		BNode left=null,right=null;
+		int indexOfX=0;
+		List<BNode<K, V>> childs = y.getChildren();
+		for(int i=0;i<childs.size();i++){
+			if (childs.get(i) == x) {
+				indexOfX=i;
+				if (i != 0) left = (BNode) y.getChild(i-1);
+				if (i != childs.size() - 1) right = (BNode) y.getChild(i+1);
+			}
+		}
+		if(right!=null && right.getNumOfKeys() >= this.mindegree){
+			x.addPoint(y.getpoint(indexOfX));
+			y.removePoint(y.getpoint(indexOfX));
+			y.addPoint(right.getpoint(0));
+			right.removePoint(right.getpoint(0));
+			BNode ch= (BNode) right.getChild(0);
+			ch.setParent(x);
+			x.addChild(ch);
+			right.removechild(ch);
+		}else if (left !=null && left.getNumOfKeys() >= this.mindegree){
+			x.addPoint(y.getpoint(indexOfX-1));
+			y.removePoint(y.getpoint(indexOfX-1));
+			y.addPoint(left.getpoint(left.getNumOfKeys()-1));
+			BNode ch= (BNode) left.getChild(left.getChildren().size()-1);
+			left.removePoint(left.getpoint(left.getData().size()-1));
+			ch.setParent(x);
+			x.addChild(0,ch);
+			left.removechild(ch);
+		}else{
+			if(right!=null){
+				merging(x,y,right,indexOfX);
+			}else if(left!=null){
+				merging(x,y,left,indexOfX-1);
+			}
+		}
+
+
+	}
+
 	public BNode searching(Comparable key) {
 		if(key==null)return null;
 		BNode node=root;
@@ -285,34 +352,41 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 			if(found!=null||node == null) {
 				break;
 			}
-			
+
 		}
 		return null;
-		
-	}
-	public void print(IBTreeNode<K,V>  n)
-	{
-		List<K> keysn=new ArrayList<K>();
-		keysn=n.getKeys();
-		for(int i = 0; i < n.getNumOfKeys(); i++)
-		{
-			System.out.print(keysn.get(i)+" " );//this part prints root node
-		}
 
-		if(!n.isLeaf())//this is called when root is not leaf;
-		{
-			for(int j = 0; j <= n.getNumOfKeys()  ; j++)//in this loop we recurse
-			{				  //to print out tree in
-				List<IBTreeNode<K, V>>childn=new ArrayList<IBTreeNode<K, V>>();
-				childn=n.getChildren();
-				if(childn.get(j) != null) //preorder fashion.
-				{			  //going from left most
-					System.out.println();	  //child to right most
-					print(childn.get(j));     //child.
-				}
-			}
-		}
+	}
+	public void print(IBTreeNode<K,V>  n , boolean printIt){
+	    if(printIt)
+            System.out.println(n.getKeys());
+        if(!n.isLeaf()){
+            for(int j = 0; j < n.getChildren().size()  ; j++)
+                    System.out.print(n.getChildren().get(j).getKeys()+" ");
+            System.out.println();
+            for(int j = 0; j < n.getChildren().size()  ; j++)
+                print(n.getChildren().get(j) , false);
+        }
 	}
 
+	public BNode predesessor(BNode x){
+		if(x.isLeaf())return x;
+		List<IBTreeNode<K, V>> childs = x.getChildren();
+		int i=0;
+		while(!x.isLeaf()){
+			childs=x.getChildren();
+			x= (BNode) childs.get(childs.size()-1);
+		}
+		return x;
+	}
+	public BNode inordersucssessor(BNode x){
+		if(x.isLeaf())return x;
+		List<IBTreeNode<K, V>> childs = x.getChildren();
+		while(!x.isLeaf()){
+			childs=x.getChildren();
+			x= (BNode) childs.get(0);
+		}
+		return x;
+	}
 
 }
