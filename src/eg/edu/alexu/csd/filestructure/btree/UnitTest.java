@@ -588,6 +588,7 @@ public class UnitTest {
 
 			Collections.shuffle(inp);
 			for (int i : inp) {
+				System.out.println(i+ " DELETE ");
 				Assert.assertTrue(btree.delete(i));
 				if (btree.getRoot() != null)
 					verifyBTree(btree.getRoot(), 0, getHeight(btree.getRoot()), 3, btree.getRoot());
@@ -648,20 +649,25 @@ public class UnitTest {
 			Random r = new Random();
 			TreeSet<Integer> set = new TreeSet<>();
 			HashSet<Integer> deleteSet = new HashSet<>();
-			for (int i = 0; i < 100000; i++) {
+			for (int i = 0; i < 500; i++) {
 				int key = r.nextInt(Integer.MAX_VALUE);
 				btree.insert(key, "Soso" + key);
 				set.add(key);
 				if (r.nextInt(5) % 4 == 0) deleteSet.add(key);
 			}
+
+
 			List<Integer> keys = new ArrayList<>();
 			List<String> vals = new ArrayList<>();
 			traverseTreeInorder(btree.getRoot(), keys, vals);
 			if (keys.size() != set.size())
 				Assert.fail();
 
+			System.out.println(deleteSet.size());
 			for (Integer i : deleteSet) {
+
 				Assert.assertTrue(btree.delete(i));
+				System.out.println(i+" xcvc  "+"ffffffffff"+btree.search(i));
 				Assert.assertNull(btree.search(i));
 			}
 			if(!verifyBTree(btree.getRoot(), 0, getHeight(btree.getRoot()), 3, btree.getRoot()))

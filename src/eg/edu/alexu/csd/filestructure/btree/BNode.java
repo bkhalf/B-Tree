@@ -9,7 +9,7 @@ public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 
 
 	private boolean leaf;
-	private int numberOfChildren;
+	public int numberOfChildren;
 	private IBTreeNode<K, V>[] children;
 	private IBTreeNode<K, V> parent;
 	private List<Point<K,V>> data;
@@ -23,7 +23,7 @@ public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 		this.parent=Parent;
 	}
 
-// to be revised
+	// to be revised
 	@Override
 	public int getNumOfKeys() {
 		return data.size();
@@ -124,16 +124,24 @@ public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 		children[i+1] = node;
 	}
 	public void addChild(int index,IBTreeNode<K,V> node){
-		children.add(index,node);
+		List<IBTreeNode<K, V>> hh =this.getChildren();
+		hh.add(index,node);
+		this.setChildren(hh);
 	}
 	public void removechild(IBTreeNode<K,V> node){
-		children.remove(node);
+		List<IBTreeNode<K, V>> hh =this.getChildren();
+		hh.remove(node);
+		this.setChildren(hh);
 	}
 	@Override
 	public void setChildren(List<IBTreeNode<K, V>> children) {
 		children.sort(Comparator.comparing(o -> o.getKeys().get(0)));
-		for(int i = 0 ; i < children.size() ; i++){
+		int i=0;
+		for(i = 0 ; i < children.size() ; i++){
 			this.children[i] = children.get(i);
+		}
+		for(int j=i;j<this.children.length;j++){
+			this.children[j]=null;
 		}
 	}
 	public List<Point<K, V>> getData() {
@@ -153,6 +161,8 @@ public class BNode <K extends Comparable<K>, V> implements IBTreeNode<K, V> {
 		data.sort(Comparator.comparing(Point::getKey));
 	}
 	public Point getpoint(int index){
+
+//		System.out.println(data.size() +"   "+index);
 		return data.get(index);
 	}
 
