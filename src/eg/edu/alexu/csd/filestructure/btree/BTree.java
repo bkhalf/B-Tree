@@ -436,11 +436,13 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 		return x;
 	}
 
-	public void searchInValue(IBTreeNode<K,V>  n , boolean printIt,String s,List<ISearchResult> results){
+	public void searchInValue(IBTreeNode<K,V>  n , boolean isWord,String s,List<ISearchResult> results){
+		if(isWord)
 		searchBackup(n,s,results);
+		else searchBackup2(n,s,results);
 		if(n.getChildren().size()>0) {
 			for (int j = 0; j < n.getChildren().size(); j++){
-				searchInValue(n.getChildren().get(j) , false,s,results);
+				searchInValue(n.getChildren().get(j) , isWord,s,results);
 			}
 		}
 //		if(printIt)
@@ -480,5 +482,31 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 		return ;
 	}
 
+	public void searchBackup2(IBTreeNode<K,V>  n ,String s,List<ISearchResult> results){
+		if(n==null)return;
+		if(n.getValues().get(0)instanceof String ) {
+			for (int i = 0; i < n.getKeys().size(); i++) {
+				String str = (String) n.getValues().get(i);
+				String findStr = s;
+				int lastIndex = 0;
+				int count = 0;
+
+				while(lastIndex != -1){
+
+					lastIndex = str.indexOf(findStr,lastIndex);
+
+					if(lastIndex != -1){
+						count ++;
+						lastIndex += findStr.length();
+					}
+				}
+				if(count>0){
+					SearchResult res = new SearchResult((String) n.getKeys().get(i),count);
+					results.add(res);
+				}
+			}
+		}
+		return ;
+	}
 
 }
