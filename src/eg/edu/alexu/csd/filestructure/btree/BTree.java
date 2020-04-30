@@ -144,11 +144,10 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 	public boolean delete(Comparable key) {
 		if(key == null) throw new RuntimeErrorException(null);
 		BNode x = searching(key);
-		if(x==null) return false;
-		for(int i=0;i<x.getNumOfKeys();i++){
-			System.out.print(x.getpoint(i).getKey()+ " ");
+		if(x==null) {
+			 return false;
 		}
-		System.out.println("\n");
+
 		if(x==root && x.isLeaf()){
 			if(x.getNumOfKeys() == 1){
 				root=null;
@@ -214,7 +213,6 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 	}
 
 	private void deleteLeaf(BNode x,Comparable key) {
-		System.out.println("Leaf");
 		List<Point<K,V>> datax=x.getData();
 		Point<K,V> theOne=null;
 		for(int i=0;i<datax.size();i++){
@@ -225,7 +223,6 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 		}
 
 		if(x.getNumOfKeys() >= this.mindegree){
-			System.out.println("Remove Direct");
 			x.removePoint(theOne);
 			return;
 		}else{
@@ -236,33 +233,27 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 			for(int i=0;i<childs.size();i++){
 				if (childs.get(i) == x) {
 					indexOfX=i;
-					System.out.println(i);
 					if (i != 0) left = (BNode) y.getChild(i-1);
 					if (i != childs.size() - 1) right = (BNode) y.getChild(i+1);
 				}
 			}
 			if(right!=null && right.getNumOfKeys() >= this.mindegree){
-				System.out.println("R");
 				x.removePoint(theOne);
 				x.addPoint(y.getpoint(indexOfX));
 				y.removePoint(y.getpoint(indexOfX));
 				y.addPoint(right.getpoint(0));
 				right.removePoint(right.getpoint(0));
 			}else if (left !=null && left.getNumOfKeys() >= this.mindegree){
-				System.out.println("left");
 				x.removePoint(theOne);
 				x.addPoint(y.getpoint(indexOfX-1));
 				y.removePoint(y.getpoint(indexOfX-1));
 				y.addPoint(left.getpoint(left.getData().size()-1));
 				left.removePoint(left.getpoint(left.getData().size()-1));
 			}else{
-				System.out.println("B");
 				x.removePoint(theOne);
 				if(right!=null){
-					System.out.println("B >> R");
 					merging(x,y,right,indexOfX);
 				}else if(left!=null){
-					System.out.println("B >> L");
 					mergingL(x,y,left,indexOfX-1);
 				}
 			}
@@ -331,7 +322,6 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 				return ;
 			}
 		}
-		System.out.println("--------------------------------");
 		BNode y = (BNode) x.getParent();
 		BNode left=null,right=null;
 		int indexOfX=0;
@@ -437,6 +427,7 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 	}
 
 	public void searchInValue(IBTreeNode<K,V>  n , boolean isWord,String s,List<ISearchResult> results){
+		if(n==null)return;
 		if(isWord)
 		searchBackup(n,s,results);
 		else searchBackup2(n,s,results);
@@ -445,17 +436,7 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 				searchInValue(n.getChildren().get(j) , isWord,s,results);
 			}
 		}
-//		if(printIt)
-//			searchBackup(n,s,results);
-////			System.out.println(n.getKeys());
-//		if(!n.isLeaf()){
-//			for(int j = 0; j < n.getChildren().size()  ; j++)
-//				searchBackup(n,s,results);
-////				System.out.print(n.getChildren().get(j).getKeys()+" ");
-////			System.out.println();
-//			for(int j = 0; j < n.getChildren().size()  ; j++)
-//				searchInValue(n.getChildren().get(j) , false,s,results);
-//		}
+
 	}
 
 	public void searchBackup(IBTreeNode<K,V>  n ,String s,List<ISearchResult> results){
@@ -467,9 +448,6 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 				for(int j=0;j<splited.length;j++){
 					String temp=splited[j].toLowerCase();
 					if(temp.equals(s.toLowerCase())){
-						System.out.println("************************");
-						System.out.println(n.getValues().get(i));
-						System.out.println("************************");
 						found++;
 					}
 				}
