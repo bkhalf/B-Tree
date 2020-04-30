@@ -912,8 +912,8 @@ public class UnitTest {
 		try {
 			searchEngine.indexDirectory("res");
 			searchEngine.deleteWebPage("res\\wiki_00");
-			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7702780", 1)});
-			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("DELETEWORD");
+			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{});
+			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("Farseer");
 			for (ISearchResult searchRes : actual) {
 				System.out.println(searchRes.toString());
 			}
@@ -952,8 +952,8 @@ public class UnitTest {
 			searchEngine.indexWebPage("res\\wiki_00");
 			searchEngine.indexWebPage("res\\subfolder\\wiki_02");
 			searchEngine.deleteWebPage("res\\wiki_01");
-			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7697611", 1)});
-			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("testDeleteWebPageUnIndexedWebPage");
+			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{});
+			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("Farseer");
 			for (ISearchResult searchRes : actual) {
 				System.out.println(searchRes.toString());
 			}
