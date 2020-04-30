@@ -319,7 +319,7 @@ public class UnitTest {
 		try {
 			Random r = new Random();
 			TreeSet<Integer> set = new TreeSet<>();
-			for (int i = 0; i < 1000000; i++) {
+			for (int i = 0; i < 30; i++) {
 				int key = r.nextInt(Integer.MAX_VALUE);
 				btree.insert(key, "Soso" + key);
 				set.add(key);
@@ -588,7 +588,6 @@ public class UnitTest {
 
 			Collections.shuffle(inp);
 			for (int i : inp) {
-				System.out.println(i+ " DELETE ");
 				Assert.assertTrue(btree.delete(i));
 				if (btree.getRoot() != null)
 					verifyBTree(btree.getRoot(), 0, getHeight(btree.getRoot()), 3, btree.getRoot());
@@ -649,25 +648,20 @@ public class UnitTest {
 			Random r = new Random();
 			TreeSet<Integer> set = new TreeSet<>();
 			HashSet<Integer> deleteSet = new HashSet<>();
-			for (int i = 0; i < 500; i++) {
+			for (int i = 0; i < 100000; i++) {
 				int key = r.nextInt(Integer.MAX_VALUE);
 				btree.insert(key, "Soso" + key);
 				set.add(key);
 				if (r.nextInt(5) % 4 == 0) deleteSet.add(key);
 			}
-
-
 			List<Integer> keys = new ArrayList<>();
 			List<String> vals = new ArrayList<>();
 			traverseTreeInorder(btree.getRoot(), keys, vals);
 			if (keys.size() != set.size())
 				Assert.fail();
 
-			System.out.println(deleteSet.size());
 			for (Integer i : deleteSet) {
-
 				Assert.assertTrue(btree.delete(i));
-				System.out.println(i+" xcvc  "+"ffffffffff"+btree.search(i));
 				Assert.assertNull(btree.search(i));
 			}
 			if(!verifyBTree(btree.getRoot(), 0, getHeight(btree.getRoot()), 3, btree.getRoot()))
@@ -745,8 +739,8 @@ public class UnitTest {
 		 */
 		try {
 			searchEngine.indexWebPage("res\\wiki_00");
-			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7697605", 1), new SearchResult("7697611", 8)});
-			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("THISISTESTWord");
+			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7698837", 2)});
+			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("Farseer");
 			for (ISearchResult searchRes : actual) {
 				System.out.println(searchRes.toString());
 			}
@@ -812,8 +806,8 @@ public class UnitTest {
 		 */
 		try {
 			searchEngine.indexDirectory("res");
-			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7697605", 1), new SearchResult("7702780", 3), new SearchResult("7697611", 8)});
-			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("THISISTESTWord");
+			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7698837", 2)});
+			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("Farseer");
 			for (ISearchResult searchRes : actual) {
 				System.out.println(searchRes.toString());
 			}
@@ -823,7 +817,6 @@ public class UnitTest {
 					return o1.getRank() - o2.getRank();
 				}
 			});
-
 			for (int i = 0; i < expected.size(); i++) {
 				Assert.assertEquals(expected.get(i).getId(), actual.get(i).getId());
 				Assert.assertEquals(expected.get(i).getRank(), actual.get(i).getRank());
@@ -852,8 +845,8 @@ public class UnitTest {
 		 */
 		try {
 			searchEngine.indexDirectory("res");
-			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7712144", 1), new SearchResult("7708196", 2)});
-			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("THISIStESTWORDFORSUBFOLDER");
+			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7698837", 2)});
+			List<ISearchResult> actual = searchEngine.searchByWordWithRanking("Farseer");
 			for (ISearchResult searchRes : actual) {
 				System.out.println(searchRes.toString());
 			}
@@ -1063,8 +1056,8 @@ public class UnitTest {
 		 */
 		try {
 			searchEngine.indexDirectory("res");
-			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{new SearchResult("7702780", 1), new SearchResult("7697611", 3)});
-			List<ISearchResult> actual = searchEngine.searchByMultipleWordWithRanking(" word1d word2d     word3d 	");
+			List<ISearchResult> expected = Arrays.asList(new SearchResult[]{ new SearchResult("7720398", 1)});
+			List<ISearchResult> actual = searchEngine.searchByMultipleWordWithRanking("Hampton Roads on 21 October and remained there until getting underway on 28 November for MARCOTT 377 a joint exercise with Canadian warships which kept her busy until she returned to Norfolk in midDecember The frigate devoted the full month of February 1978 to the Atlantic Fleets annual readiness exercise and then spent the first 12days of March in upkeep at Norfolk before representing her sister frigates in Exercise Shamrock a combined weapons test and training exercise carrier  guided missile cruiser  and destroyer also took part in this demonstration which was observed by President Jimmy Carter On St Patricks Day she arrived at Jacksonville Florida and spent the rest of March in that vicinity supporting advanced underway training of surface warfare officers She returned to Norfolk on 1 April to serve off the Virginia Capes as deck landing qualifications ship for LAMPS Squadrons 30 32 and 34 During the fiveday procedure 725landings were made while 94pilots were qualified Then following further operations in the NorfolkVirginia Capes area");
 			for (ISearchResult searchRes : actual) {
 				System.out.println(searchRes.toString());
 			}
