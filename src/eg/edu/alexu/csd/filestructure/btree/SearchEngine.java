@@ -105,7 +105,6 @@ public class SearchEngine implements ISearchEngine {
 		List<ISearchResult> re=new ArrayList<ISearchResult>();
 		if(word=="")return re;
         tree.searchInValue(tree.getRoot(),true,word,re);
-        System.out.println(re.size()+"  SIZE ");
 		return re;
 	}
 
@@ -115,7 +114,6 @@ public class SearchEngine implements ISearchEngine {
 		List<ISearchResult> re=new ArrayList<ISearchResult>();
 		if(sentence=="")return re;
 		tree.searchInValue(tree.getRoot(),false,sentence,re);
-		System.out.println(re.size()+"  SIZE ");
 		return re;
 	}
 
