@@ -378,8 +378,8 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 		V found=null;
 		while(true) {
 			ArrayList<K> ke=(ArrayList<K>) node.getKeys();
-			ArrayList<K> va=(ArrayList<K>) node.getValues();
-			ArrayList<K> ch=(ArrayList<K>) node.getChildren();
+			ArrayList<V> va=(ArrayList<V>) node.getValues();
+			ArrayList<BNode> ch=(ArrayList<BNode>) node.getChildren();
 			int i=0;
 			for(i=0;i<ke.size();i++) {
 				int comp=key.compareTo(ke.get(i));
@@ -435,5 +435,50 @@ public class BTree<K extends Comparable<K>, V> implements IBTree <K,V> {
 		}
 		return x;
 	}
+
+	public void searchInValue(IBTreeNode<K,V>  n , boolean printIt,String s,List<ISearchResult> results){
+		searchBackup(n,s,results);
+		if(n.getChildren().size()>0) {
+			for (int j = 0; j < n.getChildren().size(); j++){
+				searchInValue(n.getChildren().get(j) , false,s,results);
+			}
+		}
+//		if(printIt)
+//			searchBackup(n,s,results);
+////			System.out.println(n.getKeys());
+//		if(!n.isLeaf()){
+//			for(int j = 0; j < n.getChildren().size()  ; j++)
+//				searchBackup(n,s,results);
+////				System.out.print(n.getChildren().get(j).getKeys()+" ");
+////			System.out.println();
+//			for(int j = 0; j < n.getChildren().size()  ; j++)
+//				searchInValue(n.getChildren().get(j) , false,s,results);
+//		}
+	}
+
+	public void searchBackup(IBTreeNode<K,V>  n ,String s,List<ISearchResult> results){
+		if(n==null)return;
+		if(n.getValues().get(0)instanceof String ) {
+			for (int i = 0; i < n.getKeys().size(); i++) {
+				String[] splited = ((String) n.getValues().get(i)).split("\\s+");
+				int found=0;
+				for(int j=0;j<splited.length;j++){
+					String temp=splited[j].toLowerCase();
+					if(temp.equals(s.toLowerCase())){
+						System.out.println("************************");
+						System.out.println(n.getValues().get(i));
+						System.out.println("************************");
+						found++;
+					}
+				}
+				if(found>0){
+					SearchResult res = new SearchResult((String) n.getKeys().get(i),found);
+					results.add(res);
+				}
+			}
+		}
+		return ;
+	}
+
 
 }
