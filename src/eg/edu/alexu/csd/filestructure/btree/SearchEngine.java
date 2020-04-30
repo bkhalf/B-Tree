@@ -102,7 +102,6 @@ public class SearchEngine implements ISearchEngine {
 	@Override
 	public List<ISearchResult> searchByWordWithRanking(String word) {
 		if(word == null )throw new RuntimeErrorException(null);
-
 		List<ISearchResult> re=new ArrayList<ISearchResult>();
 		if(word=="")return re;
         tree.searchInValue(tree.getRoot(),true,word,re);
@@ -113,10 +112,11 @@ public class SearchEngine implements ISearchEngine {
 	@Override
 	public List<ISearchResult> searchByMultipleWordWithRanking(String sentence) {
 		if(sentence == null )throw new RuntimeErrorException(null);
-
 		List<ISearchResult> re=new ArrayList<ISearchResult>();
 		if(sentence=="")return re;
-		return null;
+		tree.searchInValue(tree.getRoot(),false,sentence,re);
+		System.out.println(re.size()+"  SIZE ");
+		return re;
 	}
 
 
